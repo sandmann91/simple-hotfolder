@@ -1,0 +1,22 @@
+{
+  "name": "simple-hotfolder",
+  "version": "1.0.0",
+  "description": "Simple application to Watch a Hotfolder",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandmann91/simple-hotfolder.git"
+  },
+  "keywords": [
+    "hotfolder"
+  ],
+  "author": "Tobias Pitzer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sandmann91/simple-hotfolder/issues"
+  },
+  "homepage": "https://github.com/sandmann91/simple-hotfolder#readme"
+}
