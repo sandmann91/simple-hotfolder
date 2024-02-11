@@ -1,9 +1,13 @@
-const SimmpleHotfolder = require("./index.js");
-
+const SimpleHotfolder = require("./index.js");
 
 // Hotfolder
-var hotfolder = new SimmpleHotfolder({
+var hotfolder = new SimpleHotfolder({
     input: './input',
-    extension: 'pptx',
-    autoDelete: true
+    extension: 'txt',
+    autoDelete: true,
+    callback: function (file, callback) {
+        console.log();
+        console.log(file);
+        callback();
+    }
 });

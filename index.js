@@ -40,6 +40,7 @@ module.exports = class {
         var me = this;
 
         me.counter = 0;
+        me.isLocked = {};
 
         options = options || {};
         options.file = options.file || false;
@@ -233,13 +234,13 @@ module.exports = class {
                     // Pre Action
                     var checkPreAction = me.preAction();
 
-                    if(checkPreAction) {
+                    if (checkPreAction) {
 
                         fileInfo.fullPath = me.options.input + "/" + file;
 
                         if (typeof me.options.callback == 'function') {
 
-                            me.options.callback(fileInfo, function(more) {
+                            me.options.callback(fileInfo, function (more) {
                                 me.afterAction(fileInfo, more);
                             });
 
@@ -274,13 +275,13 @@ module.exports = class {
             var fileInfo = me.getFileInfo(file);
 
             if (me.options.extension.indexOf(fileInfo.ext.toLowerCase()) >= 0) {
-                console.log(`   ├── Dateiendung ${fileInfo.ext.toLowerCase()} wurde geprüft und wird verarbeitet`);
+                console.log(`   └── Dateiendung ${fileInfo.ext.toLowerCase()} wurde geprüft und wird verarbeitet`);
             } else {
 
                 checked = false;
 
                 if (me.options.autoDelete) {
-                    console.log(`   ├── .${fileInfo.ext.toLowerCase()} Datei wird nicht verarbeitet und gelöscht`);
+                    console.log(`   └── .${fileInfo.ext.toLowerCase()} Datei wird nicht verarbeitet und gelöscht`);
                     me.deleteFile(me.options.input + "/" + file);
                 } else {
                     console.log(`   └── .${fileInfo.ext.toLowerCase()} Datei wird nicht verarbeitet`);
@@ -334,6 +335,22 @@ module.exports = class {
 
 
 
+    checkFileReadySync(path) {
+
+        var result = false;
+
+        try {
+            result = fs.openSync(path, "r+");
+        } catch (err) {
+            if (err && err.code === "EBUSY") {
+                result = "wait";
+            }
+        }
+
+        return result;
+    }
+
+
     /**
      * Prüft ob eine Datei bereit ist.
      * Dies ist notwendig, da die Datei schon beim schreiben des ersten Bytes hier auftaucht, dann aber noch nicht vollständig geschrieben wurde.
@@ -343,9 +360,8 @@ module.exports = class {
      * @param {Function} callback Der Callback der ausgführt wird. Hat als Parameter `true` oder `false` wenn die Datei ready ist
      */
     checkFileReady(path, callback) {
+
         var me = this;
-
-
 
         // Prüfen ob die Datei Lesbar ist
         fs.open(path, "r+", function (err, fd) {
@@ -353,7 +369,8 @@ module.exports = class {
             // Wenn die Datei noch in Bearbeitung ist
             if (err && err.code === "EBUSY") {
 
-                console.log("   ├── 🔒 Datei ist gesperrt");
+                me.isLocked[fd] = true;
+                console.log("   └── 🔒 Datei ist gesperrt. Async Callback");
 
                 setTimeout(function () {
                     me.checkFileReady(path, callback);
@@ -369,7 +386,12 @@ module.exports = class {
             } else {
 
                 fs.close(fd, function () {
-                    console.log("   ├── 🔓 Datei ist nicht mehr gesperrt");
+
+                    if (typeof me.isLocked[fd] != 'undefined') {
+                        console.log("   ├── 🔓 Datei ist nicht mehr gesperrt");
+                        delete me.isLocked[fd];
+                    }
+
                     callback(true);
                 });
             }
@@ -393,14 +415,14 @@ module.exports = class {
     }
 
     afterAction(fileInfo) {
-        
+
         var me = this;
 
         if (me.options.autoDelete) {
-            console.log(`   ├── ✅ Datei wurde vollständig verarbeitet und wird jetzt gelöscht`);
+            // console.log(`   ├── ✅ Datei wurde vollständig verarbeitet und wird jetzt gelöscht`);
             me.deleteFile(fileInfo.fullPath);
         } else {
-            console.log(`   └── ✅ Datei wurde vollständig verarbeitet`);
+            // console.log(`   └── ✅ Datei wurde vollständig verarbeitet`);
         }
 
     }
@@ -420,8 +442,6 @@ module.exports = class {
 
         fs.watch(me.options.input, (eventType, filename) => {
             if (eventType == "rename" && me.isFile(me.options.input + "/" + filename)) {
-                console.log();
-                console.log("📂 Input");
                 me.processScan(filename);
             }
         });
@@ -447,7 +467,7 @@ module.exports = class {
 
         me.checkFileReady(file, function (ready) {
             if (ready) {
-                console.log("   └── 🗑️  Datei wurde gelöscht");
+                console.log(`   🗑️  Datei >${file}< wurde gelöscht`);
                 fs.unlinkSync(file);
             }
         });
