@@ -79,9 +79,7 @@ module.exports = class {
                 me.options.extension[index] = value.toLowerCase();
             });
         }
-
-        console.log(me.options);
-
+        
         if (me.options.start) {
             me.start();
         }
