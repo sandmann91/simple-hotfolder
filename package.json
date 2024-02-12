@@ -1,6 +1,6 @@
 {
   "name": "simple-hotfolder",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple application to Watch a Hotfolder",
   "main": "index.js",
   "scripts": {

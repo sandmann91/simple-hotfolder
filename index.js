@@ -79,10 +79,13 @@ module.exports = class {
                 me.options.extension[index] = value.toLowerCase();
             });
         }
-        
+
+
+
         if (me.options.start) {
             me.start();
         }
+
     }
 
 
@@ -127,7 +130,9 @@ module.exports = class {
         console.log(`   └── by ${me.options.appAuthor}`);
         console.log();
 
-        me.watch();
+        me.all(function () {
+            me.watch();
+        });
     }
 
     /**
@@ -135,6 +140,7 @@ module.exports = class {
      *
      */
     getConfig(config) {
+
         // Read Counter
         var me = this;
 
@@ -166,14 +172,13 @@ module.exports = class {
      */
     all(cb) {
 
-        console.log("> Process all Files");
-
-        me = this;
+        var me = this;
 
         var i = 0;
 
         // Alle Dateien Scannen
-        fs.readdir(me.config.input, (err, files) => {
+        fs.readdir(me.options.input, (err, files) => {
+
             // Jede Datei verarbeiten
             files.forEach((file) => {
 
